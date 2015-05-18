@@ -18,6 +18,8 @@
 
 namespace Zend\EventManager;
 
+use Zend\EventManager\Exception\RuntimeException;
+
 /**
  * EventManager
  */
