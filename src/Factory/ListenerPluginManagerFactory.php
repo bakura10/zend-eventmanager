@@ -24,6 +24,7 @@ use Zend\ServiceManager\FactoryInterface;
 
 /**
  * ListenerPluginManagerFactory
+ * @codeCoverageIgnore
  */
 class ListenerPluginManagerFactory implements FactoryInterface
 {
