@@ -16,7 +16,7 @@
  * and is licensed under the MIT license.
  */
 
-namespace Zend\EventManager;
+namespace Zend\EventManager\Exception;
 
 /**
  * @author  Michaël Gallego <mic.gallego@gmail.com>
