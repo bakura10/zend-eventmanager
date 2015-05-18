@@ -101,6 +101,39 @@ class EventManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testTriggerUntil()
     {
-        $this->markTestIncomplete('Not written yet');
+        $eventManager = new EventManager();
+
+        $listenersTriggered = [];
+
+        $eventManager->attach('MyEvent', function (Event $event) use (&$listenersTriggered) {
+            $listenersTriggered[] = 'listenerOne';
+            return 'go';
+        }, 1);
+
+        $eventManager->attach('MyEvent', function (Event $event) use (&$listenersTriggered) {
+            $listenersTriggered[] = 'listenerTwo';
+            return 'stop';
+        }, 2);
+
+        $eventManager->attach('MyEvent', function (Event $event) use (&$listenersTriggered) {
+            $listenersTriggered[] = 'listenerThree';
+            return 'go';
+        }, 3);
+
+        $responseCollection = $eventManager->triggerUntil('MyEvent', new Event(), function ($response) {
+            return $response === 'stop';
+        });
+
+        // We expect two and three to have been triggered (because two stops propagation)
+        $this->assertContains('listenerTwo', $listenersTriggered);
+        $this->assertContains('listenerThree', $listenersTriggered);
+
+        // Ensure events have been triggered according to highest priority first
+        $this->assertSame([
+            'listenerThree',
+            'listenerTwo',
+        ], $listenersTriggered);
+
+        $this->assertSame(2, $responseCollection->count());
     }
 }
