@@ -34,9 +34,7 @@ class EventManagerTest extends \PHPUnit_Framework_TestCase
             $listenersTriggered[] = 'listenerThree';
         }, 3);
 
-        $event = new Event();
-
-        $eventManager->trigger('MyEvent', $event);
+        $eventManager->trigger('MyEvent', new Event());
 
         // We expect two and three to have been triggered (because two stops propagation)
         $this->assertContains('listenerTwo', $listenersTriggered);
@@ -60,8 +58,7 @@ class EventManagerTest extends \PHPUnit_Framework_TestCase
 
         $this->setExpectedException(RuntimeException::class);
 
-        $event = new Event();
-        $eventManager->trigger('MyEvent', $event);
+        $eventManager->trigger('MyEvent', new Event());
     }
 
     public function testLazyInstantiator()
@@ -71,12 +68,30 @@ class EventManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testDetachReturnsFalseIfEventDoesNotExist()
     {
-        $this->markTestIncomplete('Not written yet');
+        $eventManager = new EventManager();
+        $result = $eventManager->detach('MyEvent', 'doesNotExist');
+
+        $this->assertFalse($result);
     }
 
     public function testDetachAllListenersForEvent()
     {
-        $this->markTestIncomplete('Not written yet');
+        $eventManager = new EventManager();
+
+        $didTriggerEvent = false;
+
+        $eventManager->attach('MyEvent', function (Event $event) use (&$didTriggerEvent) {
+            $didTriggerEvent = true;
+        });
+        $eventManager->attach('MyEvent', function (Event $event) use (&$didTriggerEvent) {
+            $didTriggerEvent = true;
+        });
+
+        $eventManager->detach('MyEvent');
+
+        $eventManager->trigger('MyEvent', new Event());
+
+        $this->assertFalse($didTriggerEvent);
     }
 
     public function testDetachSingleListener()
