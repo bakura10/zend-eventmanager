@@ -63,7 +63,26 @@ class EventManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testLazyInstantiator()
     {
-        $this->markTestIncomplete('Not written yet');
+        $lazilyInstantiatedListener = null;
+
+        $eventManager = new EventManager(function ($requestedListener) use (&$lazilyInstantiatedListener) {
+            $this->assertSame(LazilyInstantiatedListener::class, $requestedListener);
+            $lazilyInstantiatedListener = new LazilyInstantiatedListener();
+            return $lazilyInstantiatedListener;
+        });
+
+        $eventManager->attach('MyEvent', [LazilyInstantiatedListener::class, 'listenerMethod']);
+
+        $event = new Event();
+
+        // Before triggering, we expect the listener to not be instantiated yet
+        $this->assertNull($lazilyInstantiatedListener);
+
+        $eventManager->trigger('MyEvent', $event);
+
+        // Now (by reference in the closure passed to EVM), the listener should be an instance, and have been triggered
+        $this->assertInstanceOf(LazilyInstantiatedListener::class, $lazilyInstantiatedListener);
+        $this->assertTrue($lazilyInstantiatedListener->hasBeenTriggered());
     }
 
     public function testDetachReturnsFalseIfEventDoesNotExist()
