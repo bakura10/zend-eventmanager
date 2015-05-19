@@ -28,6 +28,7 @@ class EventManagerFactory implements FactoryInterface
     {
         // @TODO: ZF3 should have a Config accessible through FQCN
         $config = $serviceLocator->get('Config');
+        $config = isset($config[$this->configKey]) ? $config[$this->configKey] : [];
 
         $eventManager = new EventManager($serviceLocator->get(ListenerPluginManager::class));
 
@@ -43,8 +44,8 @@ class EventManagerFactory implements FactoryInterface
          *
          *
          */
-        $listenerAggregates = isset($config[$this->configKey]['listener_aggregates'])
-            ? $config[$this->configKey]['listener_aggregates']
+        $listenerAggregates = isset($config['listener_aggregates'])
+            ? $config['listener_aggregates']
             : [];
 
         foreach($listenerAggregates as $aggregateClass) {
@@ -66,8 +67,8 @@ class EventManagerFactory implements FactoryInterface
          *
          *
          */
-        $listeners = isset($config[$this->configKey]['listeners'])
-            ? $config[$this->configKey]['listeners']
+        $listeners = isset($config['listeners'])
+            ? $config['listeners']
             : [];
 
         foreach($listeners as $eventName => $listenerSpecs) {
