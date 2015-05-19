@@ -115,7 +115,23 @@ class EventManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testDetachSingleListener()
     {
-        $this->markTestIncomplete('Not written yet');
+        $eventManager = new EventManager();
+
+        $hasBeenTriggered = false;
+        $listener = function ($event) use (&$hasBeenTriggered) {
+            $hasBeenTriggered = true;
+        };
+
+        $eventManager->attach('MyEvent', $listener);
+        $this->assertFalse($hasBeenTriggered, 'Event has been triggered before trigger was called');
+
+        $eventManager->trigger('MyEvent', new Event());
+        $this->assertTrue($hasBeenTriggered, 'Event has not been triggered when it was expected');
+
+        $hasBeenTriggered = false;
+        $eventManager->detach('MyEvent', $listener);
+        $eventManager->trigger('MyEvent', new Event());
+        $this->assertFalse($hasBeenTriggered, 'The event listener was NOT detached properly');
     }
 
     public function testTriggerUntil()
