@@ -18,7 +18,7 @@
 
 namespace Zend\EventManager\Factory;
 
-use Zend\Di\ServiceLocatorInterface;
+use Zend\ServiceManager\ServiceLocatorInterface;
 use Zend\EventManager\ListenerPluginManager;
 use Zend\ServiceManager\FactoryInterface;
 
@@ -30,7 +30,7 @@ class ListenerPluginManagerFactory implements FactoryInterface
     /**
      * {@inheritDoc}
      */
-    public function __invoke(ServiceLocatorInterface $serviceLocator, $className, array $options = [])
+    public function __invoke(ServiceLocatorInterface $serviceLocator, $requestedName, array $options = [])
     {
         // @TODO: ZF3 should have a Config accessible through FQCN
         $config = $serviceLocator->get('Config');
