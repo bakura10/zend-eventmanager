@@ -19,49 +19,51 @@ class EventManagerFactory implements FactoryInterface
      *
      * @var string
      */
-    protected $configKey = "event_manager";
+    protected $configKey = 'event_manager';
 
     /**
      * {@inheritDoc}
      */
-    public function __invoke(ServiceLocatorInterface $serviceLocator, $className, array $options = [])
+    public function __invoke(ServiceLocatorInterface $serviceLocator, $requestedName, array $options = [])
     {
         // @TODO: ZF3 should have a Config accessible through FQCN
         $config = $serviceLocator->get('Config');
 
-        $evm = new EventManager($serviceLocator->get(ListenerPluginManager::class));
+        $eventManager = new EventManager($serviceLocator->get(ListenerPluginManager::class));
 
-        if (isset($config[$this->configKey])) {
-            if (isset($config[$this->configKey]['listener_aggregates'])) {
-                foreach($config[$this->configKey]['listener_aggregates'] as $aggregateClass) {
-                    // @TODO: perform some checks before like class_exists and maybe implements interface as well?
-                    $aggregateClass::attachAggregate($evm);
-                }
-            }
+        $listenerAggregates = isset($config[$this->configKey]['listener_aggregates'])
+            ? $config[$this->configKey]['listener_aggregates']
+            : [];
 
-            /*
-             * @example
-             *
-             * [
-             *   'event_listener_map' => [
-             *     'my.event.name' => [
-             *        [[My\Listener1::class, 'onMyEventName'], 100],
-             *        [[My\Listener2::class, 'onMyEventName'], 100],
-             *     ]
-             *   ]
-             * ]
-             *
-             *
-             */
-            if (isset($config[$this->configKey]['event_listener_map'])) {
-                foreach($config[$this->configKey]['event_listener_map'] as $eventName => $listeners) {
-                    foreach($listeners as $listenerSpecPriorityArr) {
-                        $evm->attach($eventName, $listenerSpecPriorityArr[0], $listenerSpecPriorityArr[1]);
-                    }
-                }
-            }
-
-            return $evm;
+        foreach($listenerAggregates as $aggregateClass) {
+            // @TODO: perform some checks before like class_exists and maybe implements interface as well?
+            $aggregateClass::attachAggregate($eventManager);
         }
+
+        /*
+         * @example
+         *
+         * [
+         *   'listeners' => [
+         *     'my.event.name' => [
+         *        [[My\Listener1::class, 'onMyEventName'], 100],
+         *        [[My\Listener2::class, 'onMyEventName'], 100],
+         *     ]
+         *   ]
+         * ]
+         *
+         *
+         */
+        $listeners = isset($config[$this->configKey]['listeners'])
+            ? $config[$this->configKey]['listeners']
+            : [];
+
+        foreach($listeners as $eventName => $listenerSpecs) {
+            foreach($listenerSpecs as list($listenerSpec, $priority)) {
+                $eventManager->attach($eventName, $listenerSpec, $priority);
+            }
+        }
+
+        return $eventManager;
     }
 } 
