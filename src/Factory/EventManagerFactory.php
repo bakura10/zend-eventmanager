@@ -31,6 +31,18 @@ class EventManagerFactory implements FactoryInterface
 
         $eventManager = new EventManager($serviceLocator->get(ListenerPluginManager::class));
 
+        /*
+         * @example
+         *
+         * [
+         *   'listener_aggregates' => [
+         *     My\EventListenerAggregate1::class,
+         *     My\EventListenerAggregate2::class,
+         *   ]
+         * ]
+         *
+         *
+         */
         $listenerAggregates = isset($config[$this->configKey]['listener_aggregates'])
             ? $config[$this->configKey]['listener_aggregates']
             : [];
