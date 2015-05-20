@@ -1,12 +1,13 @@
 {
     "name": "zendframework/zend-eventmanager",
-    "description": " ",
+    "description": "Event Manager is a flexible and fast component designed for subject/observers patterns",
     "license": "BSD-3-Clause",
     "keywords": [
         "zf3",
         "eventmanager"
     ],
     "homepage": "https://github.com/zendframework/zend-event-manager",
+    "minimum-stability": "dev",
     "autoload": {
         "psr-4": {
             "Zend\\EventManager\\": "src/"
@@ -32,6 +33,6 @@
     "require-dev": {
         "fabpot/php-cs-fixer": "1.7.*",
         "satooshi/php-coveralls": "dev-master",
-        "phpunit/PHPUnit": "~4.4"
+        "phpunit/phpunit": "~4.6"
     }
 }
