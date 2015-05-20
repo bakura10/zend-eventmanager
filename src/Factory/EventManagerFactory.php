@@ -9,7 +9,9 @@
 namespace Zend\EventManager\Factory;
 
 use Zend\EventManager\EventManager;
+use Zend\EventManager\ListenerAggregateInterface;
 use Zend\EventManager\ListenerPluginManager;
+use Zend\EventManager\RuntimeException;
 use Zend\ServiceManager\FactoryInterface;
 
 class EventManagerFactory implements FactoryInterface
@@ -30,7 +32,11 @@ class EventManagerFactory implements FactoryInterface
         $config = $serviceLocator->get('Config');
         $config = isset($config[$this->configKey]) ? $config[$this->configKey] : [];
 
-        $eventManager = new EventManager($serviceLocator->get(ListenerPluginManager::class));
+        /** @var ListenerPluginManager $listenerPluginManager */
+        $listenerPluginManager = $serviceLocator->get(ListenerPluginManager::class);
+        $eventManager          = new EventManager(function($requestedName) use ($listenerPluginManager) {
+            return $listenerPluginManager->get($requestedName);
+        });
 
         /*
          * @example
@@ -42,14 +48,17 @@ class EventManagerFactory implements FactoryInterface
          *   ]
          * ]
          *
-         *
          */
-        $listenerAggregates = isset($config['listener_aggregates'])
-            ? $config['listener_aggregates']
-            : [];
+        $listenerAggregates = isset($config['listener_aggregates']) ? $config['listener_aggregates'] : [];
 
-        foreach($listenerAggregates as $aggregateClass) {
-            // @TODO: perform some checks before like class_exists and maybe implements interface as well?
+        foreach ($listenerAggregates as $aggregateClass) {
+            if (!$aggregateClass instanceof ListenerAggregateInterface) {
+                throw new RuntimeException(sprintf(
+                    'Listener aggregates must implement "Zend\EventManager\ListenerAggregateInterface", "%s" given',
+                    is_object($aggregateClass) ? get_class($aggregateClass) : gettype($aggregateClass)
+                ));
+            }
+
             $aggregateClass::attachAggregate($eventManager);
         }
 
@@ -65,18 +74,15 @@ class EventManagerFactory implements FactoryInterface
          *   ]
          * ]
          *
-         *
          */
-        $listeners = isset($config['listeners'])
-            ? $config['listeners']
-            : [];
+        $listeners = isset($config['listeners']) ? $config['listeners'] : [];
 
-        foreach($listeners as $eventName => $listenerSpecs) {
-            foreach($listenerSpecs as list($listenerSpec, $priority)) {
+        foreach ($listeners as $eventName => $listenerSpecs) {
+            foreach ($listenerSpecs as list($listenerSpec, $priority)) {
                 $eventManager->attach($eventName, $listenerSpec, $priority);
             }
         }
 
         return $eventManager;
     }
-} 
+}
