@@ -51,10 +51,7 @@ class EventManagerTest extends \PHPUnit_Framework_TestCase
     {
         $eventManager = new EventManager();
 
-        $spec = [
-            'SomeEventListener'
-        ];
-        $eventManager->attach('MyEvent', $spec);
+        $eventManager->attach('MyEvent', ['SomeEventListenerClass', 'listenerMethod']);
 
         $this->setExpectedException(RuntimeException::class);
 
