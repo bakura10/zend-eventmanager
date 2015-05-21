@@ -18,6 +18,8 @@
 
 namespace Zend\EventManager;
 
+use Zend\EventManager\Exception\RuntimeException;
+
 /**
  * EventManager
  */
@@ -83,11 +85,11 @@ class EventManager implements EventManagerInterface
         $found = false;
 
         foreach ($this->events[$eventName] as &$listenersByPriority) {
-            $key = array_search($callbackOrSpec, $listenersByPriority, true);
-
-            if ($key !== false) {
-                unset($listenersByPriority[$key]);
-                $found = true;
+            foreach ($listenersByPriority as $key => $listener) {
+                if ($listener[0] === $callbackOrSpec) {
+                    unset($listenersByPriority[$key]);
+                    $found = true;
+                }
             }
         }
 
