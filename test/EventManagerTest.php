@@ -187,4 +187,27 @@ class EventManagerTest extends \PHPUnit_Framework_TestCase
         $eventManager->trigger('MyEvent2', new Event());
         $this->assertSame(2, $triggerCount);
     }
+
+    public function testWildcardListenerPriorityAgainstNonWildcardListener()
+    {
+        $eventManager = new EventManager();
+
+        $listenersTriggered = [];
+
+        $eventManager->attach('*', function (Event $event) use (&$listenersTriggered) {
+            $listenersTriggered[] = '*';
+        }, 1);
+
+        $eventManager->attach('SpecificListener', function (Event $event) use (&$listenersTriggered) {
+            $listenersTriggered[] = 'SpecificListener';
+        }, 1);
+
+        $eventManager->trigger('SpecificListener', new Event());
+
+        // The order is important - a named listener must be executed before wildcard listener
+        $this->assertSame([
+            'SpecificListener',
+            '*',
+        ], $listenersTriggered);
+    }
 }
