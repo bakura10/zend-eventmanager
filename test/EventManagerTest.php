@@ -168,4 +168,23 @@ class EventManagerTest extends \PHPUnit_Framework_TestCase
 
         $this->assertSame(2, $responseCollection->count());
     }
+
+    public function testWildcardListener()
+    {
+        $eventManager = new EventManager();
+
+        $triggerCount = 0;
+
+        $eventManager->attach('*', function (Event $event) use (&$triggerCount) {
+            $triggerCount++;
+        }, 1);
+
+        $this->assertSame(0, $triggerCount);
+
+        $eventManager->trigger('MyEvent1', new Event());
+        $this->assertSame(1, $triggerCount);
+
+        $eventManager->trigger('MyEvent2', new Event());
+        $this->assertSame(2, $triggerCount);
+    }
 }
