@@ -63,16 +63,15 @@ class EventManager implements EventManagerInterface
      * Allows optionally specifying identifier(s) to use to pull signals from a
      * SharedEventManagerInterface.
      *
-     * @param  null|string|int|array|Traversable $identifiers
+     * @param string|array|Traversable    $identifiers
+     * @param SharedEventManagerInterface $sharedEventManager
      */
-    public function __construct($identifiers = null, SharedEventManagerInterface $sharedEventManager = null)
+    public function __construct($identifiers = [], SharedEventManagerInterface $sharedEventManager = null)
     {
+        $this->setIdentifiers($identifiers);
+
         if ($sharedEventManager) {
             $this->sharedManager = $sharedEventManager;
-        }
-
-        if ($identifiers !== null) {
-            $this->setIdentifiers($identifiers);
         }
     }
 
@@ -372,16 +371,7 @@ class EventManager implements EventManagerInterface
             $identifiers = iterator_to_array($identifiers);
         }
 
-        if (is_string($identifiers) && ! empty($identifiers)) {
-            $identifiers = (array) $identifiers;
-        }
-
-        if (! is_array($identifiers)) {
-            throw new Exception\InvalidArgumentException(sprintf(
-                'Identifiers must be a non-empty string, an array, or a Traversable set; received %s',
-                (is_object($identifiers) ? get_class($identifiers) : gettype($identifiers))
-            ));
-        }
+        $identifiers = (array) $identifiers;
 
         return $identifiers;
     }
